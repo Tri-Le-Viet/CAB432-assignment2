@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--TODO: add favicon-->
+    <link rel="stylesheet" type="text/css" href="/css/map.css"/>
+  </head>
+  <body>
+    <form action="search" method="POST">
+      <label for="start">Starting Location:</label><br/>
+      <input type="text" name="start" id="start"/><br/>
+      <label for="start">End Location:</label><br/>
+      <input type="text" name="end" id="end"/><br/>
+      <input type="text" name="start_coords" id="start_coords" class="hidden">
+      <input type="text" name="end_coords" id="end_coords" class="hidden">
+      <input type="submit" value="Submit"/>
+    </form>
+    <div id="map"></div>
+  </body>
+  <script src="/js/form.js"></script>
+  <script src="/js/map.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=API_KEY_GOES_HERE&libraries=places&callback=setupForms"></script>
+</html>
