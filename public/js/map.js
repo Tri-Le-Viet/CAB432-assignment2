@@ -8,11 +8,11 @@ fetch("https://raw.githubusercontent.com/Tri-Le-Viet/CAB432-assignment2/main/tra
 
 function initMap() {
   let myLatLng = {
-    lat: -25.363, //TODO: change to Queensland
-    lng: 131.044
+    lat: -266.26563,
+    lng: 150.478155
   };
   map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 6,
+    zoom: 7,
     center: myLatLng,
   });
 

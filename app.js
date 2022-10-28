@@ -1,17 +1,22 @@
-
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+const redis = require("redis");
 require('dotenv').config();
 
 const app = express();
 const port = 8080; // TODO: replace port number process.env.PORT
 const trafficCams = require("./trafficCams.json"); //TODO: in final we should recreate trafficCams.json each time
+const redisPort = process.env.REDIS_PORT;
+const redisHost = process.env.REDIS_HOST;
+const redisPass = process.env.REDIS_PASS;
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
+
+//TODO: redis client
 
 app.get("/", (req, res) => {
   console.log("Hello, world!");
@@ -55,9 +60,11 @@ app.post("/search", async (req, res) => {
     }
   }
 
-
   console.log(steps.length + " " + trafficCams.length);
   console.log("All cameras found"); // TODO :remove once testing done
+
+  // TODO: push route to redis, with expiry of 15 minutes
+  // key is {start_location} - {end_location}
 
   // now we have the list of steps so we can plot or do what we want with them
 });
