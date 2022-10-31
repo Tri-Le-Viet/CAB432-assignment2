@@ -17,20 +17,26 @@ const listAlbums = async () => {
   }
 };
 
-const viewAlbum = async (albumName) => {
+const viewAlbum = async (albumNames) => {
   try {
-    const albumBucketName = process.env.AWS_BUCKET;
-    const data = await s3Client.send(
-      new ListObjectsCommand({
-        Prefix: albumName,
-        Bucket: albumBucketName,
-      })
-    );
-    const photos = await Promise.all(data.Contents.map(function (photo) {
-      const photoKey = photo.Key;
-      return photoKey
+    const albums = await Promise.all(albumNames.map(async function (album) {
+      const albumBucketName = process.env.AWS_BUCKET;
+      const data = await s3Client.send(
+        new ListObjectsCommand({
+          Prefix: album,
+          Bucket: albumBucketName,
+        })
+      );
+      const photos = await Promise.all(data.Contents.map(function (photo) {
+        const photoKey = photo.Key;
+        return photoKey
+      }));
+      return {
+        name: album,
+        keys: photos
+      }
     }));
-    return photos
+    return albums
   } catch (err) {
     return console.log("There was an error viewing your album: " + err.message);
   }
