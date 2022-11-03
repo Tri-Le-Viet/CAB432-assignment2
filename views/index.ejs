@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--TODO: add favicon-->
+    <link rel="stylesheet" type="text/css" href="css/map.css"/>
+    <link rel="stylesheet" type="text/css" href="css/base.css"/>
+    <!--TODO: add css styling for form -->
+  </head>
+  <body>
+
+    <form action="search" method="POST">
+      <label for="start">Starting Location:</label><br/>
+      <input type="text" name="start" id="start"/><br/>
+      <label for="start">End Location:</label><br/>
+      <input type="text" name="end" id="end"/><br/>
+      <div class="hidden">
+        <input type="text" name="start_coords" id="start_coords">
+        <input type="text" name="end_coords" id="end_coords">
+      </div>
+      <input type="submit" value="Submit"/>
+    </form>
+    <div id="map"></div>
+  </body>
+  <div id="data" class="hidden"><%=trafficCams%></div>
+  <script src="js/form.js"></script>
+  <script src="js/map.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=<%=key%>&libraries=places&callback=setupForms"></script>
+</html>

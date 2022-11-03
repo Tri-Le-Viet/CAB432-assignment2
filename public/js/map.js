@@ -1,14 +1,15 @@
 let map;
 let markers = [];
 
-//TODO: this is just a placeholder, please replace as soon as possible
-let trafficCams;
-fetch("https://raw.githubusercontent.com/Tri-Le-Viet/CAB432-assignment2/main/trafficCams.json?token=GHSAT0AAAAAAB2DTCX6LSEZIOGQEP4GLPHIY2YOCZQ").then(response => response.json())
-  .then((data) => trafficCams = data);
+
+const trafficCams = JSON.parse(document.getElementById("data").innerHTML);
+
+const icon_base = "http://maps.google.com/mapfiles/kml/shapes/";
+const camera_icon = icon_base + "camera.png";
 
 function initMap() {
   let myLatLng = {
-    lat: -266.26563,
+    lat: -26.26563,
     lng: 150.478155
   };
   map = new google.maps.Map(document.getElementById("map"), {
@@ -23,18 +24,19 @@ function initMap() {
     addMarker({
       lat: coordinates[1],
       lng: coordinates[0]
-    }, map, trafficCams[i].properties.description, markers);
+    }, map, trafficCams[i].properties.description, markers, camera_icon);
   }
 }
 
-function addMarker(coords, map, label, markers) {
+function addMarker(coords, map, marker_name, markers, icon) {
   let new_marker = new google.maps.Marker({
     position: coords,
+    icon: icon,
     map: map
   });
 
   let info_window = new google.maps.InfoWindow({
-    content: label
+    content: marker_name
   });
 
   new_marker.addListener("click", () => {
