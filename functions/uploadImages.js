@@ -1,5 +1,4 @@
 const trafficCams = require('../trafficCams.json');
-const cron = require('node-cron');
 const axios = require('axios');
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { s3Client } = require("../libs/s3Client.js");
@@ -38,9 +37,6 @@ function uploadImages() {
   };
 };
 
-cron.schedule('* * * * *', () => {
-  console.log('running a task every minute');
-  uploadImages();
-});
+module.exports = { uploadImages };
 
 
