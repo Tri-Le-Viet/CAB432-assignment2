@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  tensorflowjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tfjs-node:cpu
+    env_file:
+        - .env
+    volumes:
+        - "${root}:/root"
+        - "${project}:/root/project"
+    command: /bin/bash
