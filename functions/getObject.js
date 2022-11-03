@@ -1,6 +1,5 @@
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
 const { s3Client } = require("../libs/s3Client.js");
-const { writeFile } = require("fs");
 
 const retrieveImage = async (imageKey) => {
   try {
@@ -30,6 +29,7 @@ const retrieveImage = async (imageKey) => {
 
 const retrieveImagesArray = async (imageKeys) => {
   try {
+    if(imageKeys.length > 0) {
     const arrayOfBuffers = await Promise.all(imageKeys.map(async function (camera) {
       const buffImages = await Promise.all(camera.keys.map(async function (imageKey) {
         const imageBuffer = await retrieveImage(imageKey)
@@ -44,15 +44,8 @@ const retrieveImagesArray = async (imageKeys) => {
         buffers: buffImages
       }
     }))
-    // const path = 'output.json';
-    // await writeFile(path, JSON.stringify(arrayOfBuffers), (error) => {
-    //   if (error) {
-    //     console.log('An error has occurred ', error);
-    //     return;
-    //   }
-    //   console.log('Data written successfully to disk');
-    // });
     return arrayOfBuffers
+}
   } catch (err) {
     console.log("Error", err);
   }
