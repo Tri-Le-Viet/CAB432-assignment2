@@ -17,3 +17,5 @@ function isNumBetween(bound1, bound2, num, radius) {
 
   return false;
 }
+
+module.exports = { isInBounds }

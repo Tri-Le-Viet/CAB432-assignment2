@@ -57,3 +57,16 @@ function onPlaceChanged(form_type) {
     }
   }
 }
+
+function check_form() {
+  let start = document.getElementById("start_coords").value;
+  let end = document.getElementById("end_coords").value;
+
+  if (start.length == 0 || end.length == 0) {
+    document.getElementById("warning").className = "";
+
+  } else {
+    document.getElementById("warning").className = "hidden";
+    document.getElementById("search_form").submit();
+  }
+}

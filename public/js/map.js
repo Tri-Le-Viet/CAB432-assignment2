@@ -1,39 +1,62 @@
 let map;
 let markers = [];
 
-
 const trafficCams = JSON.parse(document.getElementById("data").innerHTML);
-
 const icon_base = "http://maps.google.com/mapfiles/kml/shapes/";
-const camera_icon = icon_base + "camera.png";
 
 function initMap() {
   let myLatLng = {
-    lat: -26.26563,
-    lng: 150.478155
+    lat: -27.445664,
+    lng: 152.668992
   };
   map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 7,
+    zoom: 9,
     center: myLatLng,
   });
 
+  const camera_icon = {
+    url:icon_base + "camera.png",
+    scaledSize: new google.maps.Size(15, 15),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(0, 0)
+  };
+
   //TODO: add event listener to map for start and end points
+  /*
+  map.addListener("new_start_location", () => {
+
+    addMarker({
+      lat:
+      lng:
+    }, map,
+    })
+  })*/
 
   for(let i=0; i < trafficCams.length; i++) {
     let coordinates = trafficCams[i].geometry.coordinates;
     addMarker({
       lat: coordinates[1],
       lng: coordinates[0]
-    }, map, trafficCams[i].properties.description, markers, camera_icon);
+    }, map, markers, trafficCams[i].properties.description, camera_icon);
   }
 }
 
-function addMarker(coords, map, marker_name, markers, icon) {
-  let new_marker = new google.maps.Marker({
-    position: coords,
-    icon: icon,
-    map: map
-  });
+function addMarker(coords, map, markers, marker_name, icon) {
+  let new_marker;
+  if (icon) {
+    new_marker = new google.maps.Marker({
+      position: coords,
+      icon: icon,
+      map: map
+    });
+
+  } else {
+    console.log(coords);
+    new_marker = new google.maps.Marker({
+      position: coords,
+      map: map
+    });
+  }
 
   let info_window = new google.maps.InfoWindow({
     content: marker_name
@@ -45,18 +68,8 @@ function addMarker(coords, map, marker_name, markers, icon) {
       map: map
     });
   });
-
+  
   markers.push(new_marker);
-}
-
-// TODO: see if this is necessary, delete otherwise
-// also markers array may be unneeded also
-function deleteMarkers(markers) {
-  for (let i = 0; i < markers.length; i++) {
-    markers[i].setMap(null);
-  }
-
-  markers = [];
 }
 
 // TOOD: initMap for search page

@@ -9,18 +9,17 @@
   </head>
   <body>
 
-    <form action="search" method="POST">
+    <form action="search" method="POST" id="search_form">
       <label for="start">Starting Location:</label><br/>
       <input type="text" name="start" id="start"/><br/>
       <label for="start">End Location:</label><br/>
       <input type="text" name="end" id="end"/><br/>
-      <div class="hidden">
-        <input type="text" name="start_coords" id="start_coords">
-        <input type="text" name="end_coords" id="end_coords">
-      </div>
-      <input type="submit" value="Submit"/>
+        <input type="text" name="start_coords" id="start_coords" class="hidden">
+        <input type="text" name="end_coords" id="end_coords" class="hidden">
+      <button onclick="check_form()">Search Route</button>
+      <div id="warning" class="hidden">Please enter both a valid start and end location</div>
     </form>
-    <div id="map"></div>
+      <div id="map"></div>
   </body>
   <div id="data" class="hidden"><%=trafficCams%></div>
   <script src="js/form.js"></script>
