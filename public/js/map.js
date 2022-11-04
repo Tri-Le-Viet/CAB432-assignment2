@@ -22,15 +22,17 @@ function initMap() {
   };
 
   //TODO: add event listener to map for start and end points
-  /*
   map.addListener("new_start_location", () => {
+    let start_text = document.getElementById("start_coords").value;
+    let start_name = document.getElementById("start").value;
 
+    // transform coordinates from text into array of lat/long
+    let coordinates = start_text.substring(1, start_text.length - 1).split(", ");
     addMarker({
-      lat:
-      lng:
-    }, map,
-    })
-  })*/
+      lat: parseFloat(coordinates[0]),
+      lng: parseFloat(coorinates[1])
+    }, map, markers, start_name, null);
+  });
 
   for(let i=0; i < trafficCams.length; i++) {
     let coordinates = trafficCams[i].geometry.coordinates;
