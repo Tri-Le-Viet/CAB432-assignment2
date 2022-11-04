@@ -15,7 +15,7 @@ function initMap() {
   });
 
   const camera_icon = {
-    url:icon_base + "camera.png",
+    url:icon_base + "camera.png", // TODO: maybe find a better looking icon
     scaledSize: new google.maps.Size(15, 15),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(0, 0)
@@ -68,7 +68,7 @@ function addMarker(coords, map, markers, marker_name, icon) {
       map: map
     });
   });
-  
+
   markers.push(new_marker);
 }
 

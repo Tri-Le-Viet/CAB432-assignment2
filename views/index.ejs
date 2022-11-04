@@ -8,7 +8,9 @@
     <!--TODO: add css styling for form -->
   </head>
   <body>
-
+    <% if error { %>
+      <h2><%=error%></h2>
+    <% } %>
     <form action="search" method="POST" id="search_form">
       <label for="start">Starting Location:</label><br/>
       <input type="text" name="start" id="start"/><br/>
