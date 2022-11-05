@@ -2,9 +2,9 @@
   "name": "qld_traffic_image_retrieve",
   "version": "1.0.0",
   "description": "Retrieve images from Qld traffic and store in s3.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

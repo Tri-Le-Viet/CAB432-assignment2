@@ -1,15 +1,15 @@
 
 const makeRedisKeys = async (camera) => {
-    var currentDateTime = await new Date();
+    var currentDateTime = await new Date("11-05-2022, 03:29:00");
     let keyarr = []
     await currentDateTime.setSeconds(00);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 60; i++) {
         await currentDateTime.setMinutes(currentDateTime.getMinutes() - 1);
         let time = (new Date(currentDateTime)).toLocaleString("en-GB", { timeZone: "Australia/Brisbane" }).replaceAll('/', '-');
         const redisKey = `${camera}/${time}.jpg`;
         await keyarr.push(redisKey)
     }
-    await currentDateTime.setMinutes(currentDateTime.getMinutes() + 60);
+    await currentDateTime.setMinutes(currentDateTime.getMinutes() - 60);
     return keyarr;
 };
 
