@@ -7,20 +7,15 @@
     <link rel="stylesheet" type="text/css" href="css/base.css"/>
   </head>
   <body>
-    <% if (locals.error_type == "route") { %>
-      <h2 id="error_message">No valid route could be found, please try other locations</h2>
-    <% } else if (locals.error_type == "input") {%>
-      <h2 id="error_message">Invalid input</h2>
-    <% } %>
-
+    <h2>Displaying data from '<%=start_name%>' to '<%=end_name%>'</h2>
     <form action="search" method="POST" id="search_form">
       <div class="search_row">
         <label for="start">Starting Location:</label><br/>
-        <input type="text" name="start" id="start" class="searchbox"/>
+        <input type="text" name="start" id="start" value="<%=start_name%>" class="searchbox"/><br/>
       </div>
       <div class="search_row">
         <label for="start">End Location:</label><br/>
-        <input type="text" name="end" id="end" class="searchbox"/>
+        <input type="text" name="end" id="end" value="<%=end_name%>" class="searchbox"/><br/>
       </div>
       <div class="search_row">
         <button type="button" onclick="check_form()">Search Route</button>
@@ -34,7 +29,11 @@
     <div id="map"></div>
   </body>
   <div id="cam_data" class="hidden"><%=traffic_cams%></div>
+  <div id="start_data" class="hidden"><%=start_coords%></div>
+  <div id="end_data" class="hidden"><%=end_coords%></div>
+  <!--TODO: add data from analysis here-->
   <script src="js/form.js"></script>
   <script src="js/map.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=<%=key%>&libraries=places&callback=setupForms"></script>
+  <script src="js/setup_search.js"></script>
 </html>

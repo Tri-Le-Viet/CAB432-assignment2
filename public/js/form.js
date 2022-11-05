@@ -6,20 +6,16 @@ function setupForms() {
   let start_input = document.getElementById("start");
   let end_input = document.getElementById("end");
 
-  start = new google.maps.places.Autocomplete(
-    start_input,
-    {
-      componentRestrictions: {"country": "AU"},
-      fields: ["place_id", "geometry", "name"]
-    });
+  let autocomplete_config = {
+    componentRestrictions: {"country": "AU"},
+    fields: ["place_id", "geometry", "name"]
+  };
 
-  end = new google.maps.places.Autocomplete(
-    end_input,
-    {
-      componentRestrictions: {"country": "AU"},
-      fields: ["place_id", "geometry", "name"]
-    });
+  start = new google.maps.places.Autocomplete(start_input, autocomplete_config);
+  end = new google.maps.places.Autocomplete(end_input, autocomplete_config);
 
+
+  // Add listeners to update coordinates after new location is selected
   start.addListener("place_changed", () => {
     onPlaceChanged("start");
   });
@@ -30,6 +26,8 @@ function setupForms() {
   initMap();
 }
 
+// Depending on which form was changed update the coordinates for
+// either the start or the destination
 function onPlaceChanged(form_type) {
   let place;
 
@@ -37,8 +35,6 @@ function onPlaceChanged(form_type) {
     place = start.getPlace();
   } else if (form_type === "end") {
     place = end.getPlace();
-  } else {
-    //TODO: some form of error handling
   }
 
   if (!place.geometry || !place.geometry.location) {
@@ -46,24 +42,46 @@ function onPlaceChanged(form_type) {
   } else {
     let lat = place.geometry.location.lat();
     let long = place.geometry.location.lng();
+    let lat_long = {
+      lat: lat,
+      lng: long
+    };
+
     let coords = "{" + lat + ","  + long + "}";
 
-
-    // TODO: send an event to map to create a pin for start and end location
     if (form_type === "start") {
+      let name = "Starting Location: " + place.name
       document.getElementById("start_coords").value = coords;
+      addMarker(lat_long, map, name, "start");
+
     } else if (form_type === "end") {
+      let name = "Destination: " + place.name
       document.getElementById("end_coords").value = coords;
+      addMarker(lat_long, map, name, "end");
     }
+  }
+
+
+  if (start_marker && end_marker) {
+    renderRoute()
   }
 }
 
-function check_form() {
-  let start = document.getElementById("start_coords").value;
-  let end = document.getElementById("end_coords").value;
 
-  if (start.length == 0 || end.length == 0) {
-    document.getElementById("warning").className = "";
+// Verifies that form has been properly filled in before submitting
+function check_form() {
+  let start_name = document.getElementById("start").value;
+  let end_name = document.getElementById("end").value;
+  let start_coords = document.getElementById("start_coords").value;
+  let end_coords = document.getElementById("end_coords").value;
+
+  // If any of the form elements is not properly filled in send warning and
+  // prevent user from submitting
+  if (start_name == "" || end_name == "" ||
+    start_coords == "" || end_coords == "") {
+
+    // Change CSS class to make warning visible
+    document.getElementById("warning").className = "warning";
 
   } else {
     document.getElementById("warning").className = "hidden";

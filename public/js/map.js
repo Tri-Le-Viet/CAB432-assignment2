@@ -1,64 +1,94 @@
 let map;
 let markers = [];
+let info_windows = [];
+let start_marker;
+let end_marker;
 
-const trafficCams = JSON.parse(document.getElementById("data").innerHTML);
+// Load traffic cam names/coords from hiddent div
+const traffic_cams = JSON.parse(document.getElementById("cam_data").innerHTML);
 const icon_base = "http://maps.google.com/mapfiles/kml/shapes/";
 
+// Create different icon markers
+let camera_icon;
+let start_icon;
+let end_icon;
+
+// Initialise map and add markers for all trafic cams
 function initMap() {
-  let myLatLng = {
+  let my_lat_long = {
     lat: -27.445664,
     lng: 152.668992
   };
   map = new google.maps.Map(document.getElementById("map"), {
     zoom: 9,
-    center: myLatLng,
+    center: my_lat_long,
   });
 
-  const camera_icon = {
+  // Resize icons to ensure they are roughly the same
+  camera_icon = {
     url:icon_base + "camera.png", // TODO: maybe find a better looking icon
     scaledSize: new google.maps.Size(15, 15),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(0, 0)
   };
 
-  //TODO: add event listener to map for start and end points
-  map.addListener("new_start_location", () => {
-    let start_text = document.getElementById("start_coords").value;
-    let start_name = document.getElementById("start").value;
+  start_icon = {
+    url: "img/start.png",
+    scaledSize: new google.maps.Size(25, 25),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(0, 0)
+  }
 
-    // transform coordinates from text into array of lat/long
-    let coordinates = start_text.substring(1, start_text.length - 1).split(", ");
-    addMarker({
-      lat: parseFloat(coordinates[0]),
-      lng: parseFloat(coorinates[1])
-    }, map, markers, start_name, null);
-  });
+  end_icon = {
+    url: "img/finish.png",
+    scaledSize: new google.maps.Size(20, 20),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(0, 0)
+  }
 
-  for(let i=0; i < trafficCams.length; i++) {
-    let coordinates = trafficCams[i].geometry.coordinates;
+  // Create marker for each camera
+  for(let i=0; i < traffic_cams.length; i++) {
+    let coordinates = traffic_cams[i].geometry.coordinates;
     addMarker({
       lat: coordinates[1],
       lng: coordinates[0]
-    }, map, markers, trafficCams[i].properties.description, camera_icon);
+    }, map, traffic_cams[i].properties.description, "camera");
   }
 }
 
-function addMarker(coords, map, markers, marker_name, icon) {
-  let new_marker;
-  if (icon) {
-    new_marker = new google.maps.Marker({
-      position: coords,
-      icon: icon,
-      map: map
-    });
+// Add a new marker to the map
+function addMarker(coords, map, marker_name, type) {
+  let icon;
+  if (type === "camera") {
+    icon = camera_icon;
 
-  } else {
-    console.log(coords);
-    new_marker = new google.maps.Marker({
-      position: coords,
-      map: map
-    });
+  } else if (type === "start") {
+    icon = start_icon;
+
+    // clear old start marker if present
+    if (start_marker) {
+      deleteMarker(markers, start_marker);
+    }
+
+    // new marker is pushed to end of list so this is index of new start_marker
+    start_marker = markers.length;
+
+  } else if (type === "end") {
+    icon = end_icon;
+
+    // clear old end marker if present
+    if (end_marker) {
+      deleteMarker(markers, end_marker);
+    }
+
+    end_marker = markers.length;
   }
+
+  let new_marker = new google.maps.Marker({
+    position: coords,
+    icon: icon,
+    map: map
+  });
 
   let info_window = new google.maps.InfoWindow({
     content: marker_name
@@ -72,10 +102,12 @@ function addMarker(coords, map, markers, marker_name, icon) {
   });
 
   markers.push(new_marker);
+  info_windows.push(info_window);
 }
 
-// TOOD: initMap for search page
-// should display route
-// only relevant cameras
-// and graph of data for each camera
-//
+// Deletes map marker at specified index in array
+function deleteMarker(markers, index) {
+  markers[index].setMap(null);
+  markers.splice(index, 1);
+  info_windows.splice(index, 1);
+}

@@ -1,3 +1,20 @@
 .hidden {
   display: none;
 }
+
+.search_row{
+  padding: 10px 40px 10px 40px;
+}
+
+.searchbox {
+  width: 40em;
+}
+
+input {
+  padding: 5px 0 5px 0;
+}
+
+#warning {
+  font-weight: bold;
+  padding: 20px 40px 20px 10px;
+}
