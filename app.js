@@ -44,6 +44,7 @@ const redisClient = createClient(elasticache_config_endpoint);
 const google_api_key = process.env.GOOGLE_API_KEY;
 
 const app = express();
+app.use(express.json());
 app.use(helmet());
 
 app.use(cors({

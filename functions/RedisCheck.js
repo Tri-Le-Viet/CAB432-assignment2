@@ -3,7 +3,7 @@ const makeRedisKeys = async (camera) => {
     var currentDateTime = await new Date();
     let keyarr = []
     await currentDateTime.setSeconds(00);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 30; i++) {
         await currentDateTime.setMinutes(currentDateTime.getMinutes() - 1);
         let time = (new Date(currentDateTime)).toLocaleString("en-GB", { timeZone: "Australia/Brisbane" }).replaceAll('/', '-');
         const redisKey = `${camera}/${time}.jpg`;
