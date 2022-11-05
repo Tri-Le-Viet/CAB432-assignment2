@@ -1,6 +1,6 @@
 
 const makeRedisKeys = async (camera) => {
-    var currentDateTime = await new Date("11-05-2022, 03:29:00");
+    var currentDateTime = await new Date();
     let keyarr = []
     await currentDateTime.setSeconds(00);
     for (let i = 0; i < 60; i++) {

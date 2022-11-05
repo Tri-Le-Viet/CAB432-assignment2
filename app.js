@@ -13,7 +13,7 @@ const { uploadImages } = require('./functions/uploadImages');
 const { getCamList } = require('./functions/retrieveCameraList');
 const { checkRedisAndMakeList, filterForUnfound, filterForFound } = require('./functions/RedisCheck');
 const { getRoute } = require("./functions/getRoute");
-const cron = require('node-cron');
+// const cron = require('node-cron');
 
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
@@ -23,11 +23,6 @@ const { createClient } = require('redis');
 
 // Load environment variables
 require('dotenv').config();
-// * TensorFlow
-const tf = require('@tensorflow/tfjs-node');
-const coco_ssd = require("@tensorflow-models/coco-ssd");
-// * Redis
-const { createClient } = require('redis');
 
 const port = process.env.PORT || 8080;
 const traffic_cams = require("./traffic_cams.json"); //TODO: in final we should recreate traffic_cams.json each time
@@ -156,16 +151,6 @@ app.post("/search", async (req, res) => {
       end_coords: request.end_coords,
       waypoints: JSON.stringify(waypoints)
     });
-  }
-});
-
-cron.schedule('* * * * *', () => {
-  try {
-    console.log('running a task every minute');
-    uploadImages(redisClient);
-  }
-  catch (e) {
-    console.log(e)
   }
 });
 

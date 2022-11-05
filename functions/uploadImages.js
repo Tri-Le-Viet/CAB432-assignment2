@@ -52,7 +52,7 @@ async function uploadImages(redisClient) {
       } else {}
     };
     console.log(
-      "Successfully uploaded objects"
+      "Successfully uploaded objects" + new Date()
     )
   } catch (err) {
     console.log(err)
