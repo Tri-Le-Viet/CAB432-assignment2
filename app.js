@@ -7,10 +7,10 @@ const cors = require("cors");
 const helmet = require("helmet");
 const checkObjects = require("./functions/checkObjects");
 const getObject = require('./functions/getObject');
-const { uploadImages } = require('./functions/uploadImages');
+// const { uploadImages } = require('./functions/uploadImages');
 const { getCamList } = require('./functions/retrieveCameraList');
 const { checkRedisAndMakeList, filterForUnfound, filterForFound } = require('./functions/RedisCheck')
-const cron = require('node-cron');
+// const cron = require('node-cron');
 require('dotenv').config();
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
@@ -203,14 +203,14 @@ app.post("/predict", (req, res) => {
   getImageAndPredict()
 });
 
-cron.schedule('* * * * *', () => {
-  try {
-    console.log('running a task every minute');
-    uploadImages(redisClient);
-  }
-  catch (e) {
-    console.log(e)
-  }
-});
+// cron.schedule('* * * * *', () => {
+//   try {
+//     console.log('running a task every minute');
+//     uploadImages(redisClient);
+//   }
+//   catch (e) {
+//     console.log(e)
+//   }
+// });
 
 app.listen(port, console.log("Server started on port " + port));
