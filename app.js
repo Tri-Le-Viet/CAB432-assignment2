@@ -111,7 +111,7 @@ app.post("/search", async (req, res) => {
 
   console.log(request); //TODO: remove once done testing
 
-  let route = getRoute(request.start, request.end);
+  let route = getRoute(request.start, request.end, redis_client);
   if (route === 503) {
     res.status(503).send("Google Maps Directions API not available. Try again later");
   } else if (route === 400){

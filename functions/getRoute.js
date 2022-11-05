@@ -1,7 +1,14 @@
-async function getRoute(start, end) {
+async function getRoute(start, end, redis_client) {
+  let route;
+
+  // If redis cache is unavailable
+  if (!redis_client) {
+    getRouteNoRedis(start, end);
+  }
+
   let redis_key = start + " - " + end;
   let result = await redisClient.get(redis_key);
-  let route;
+
   if (result) {
     route = JSON.parse(result);
   } else {
