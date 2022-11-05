@@ -6,7 +6,7 @@ let end_marker;
 
 // Load traffic cam names/coords from hiddent div
 const traffic_cams = JSON.parse(document.getElementById("cam_data").innerHTML);
-const icon_base = "http://maps.google.com/mapfiles/kml/shapes/";
+const icon_base = "http://maps.google.com/mapfiles/kml/";
 
 // Create different icon markers
 let camera_icon;
@@ -26,7 +26,7 @@ function initMap() {
 
   // Resize icons to ensure they are roughly the same
   camera_icon = {
-    url:icon_base + "camera.png", // TODO: maybe find a better looking icon
+    url:icon_base + "shapes/camera.png", // TODO: maybe find a better looking icon
     scaledSize: new google.maps.Size(15, 15),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(0, 0)
@@ -42,6 +42,13 @@ function initMap() {
   end_icon = {
     url: "img/finish.png",
     scaledSize: new google.maps.Size(20, 20),
+    origin: new google.maps.Point(0, 0),
+    anchor: new google.maps.Point(0, 0)
+  }
+
+  waypoint_icon = {
+    url:icon_base + "paddle/red-circle.png",
+    scaledSize: new google.maps.Size(15, 15),
     origin: new google.maps.Point(0, 0),
     anchor: new google.maps.Point(0, 0)
   }
@@ -62,7 +69,10 @@ function addMarker(coords, map, marker_name, type) {
   if (type === "camera") {
     icon = camera_icon;
 
-  } else if (type === "start") {
+  } else if (type === "waypoint") {
+    icon = waypoint_icon;
+    
+  }else if (type === "start") {
     icon = start_icon;
 
     // clear old start marker if present

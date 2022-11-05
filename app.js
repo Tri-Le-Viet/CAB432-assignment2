@@ -111,7 +111,9 @@ app.post("/search", async (req, res) => {
 
   console.log(request); //TODO: remove once done testing
 
+  let waypoints = [];
   let route = getRoute(request.start, request.end, redis_client);
+
   if (route === 503) {
     res.status(503).send("Google Maps Directions API not available. Try again later");
   } else if (route === 400){
@@ -121,11 +123,18 @@ app.post("/search", async (req, res) => {
     let relevant_cameras = [];
 
     for (let i = 0; i < steps.length; i++) {
+      // Find start and end location of each leg
+      let start_location = [steps[i].start_location.lat, steps[i].start_location.lng];
+      let end_location = [steps[i].end_location.lat, steps[i].end_location.lng];
+
+      if (i != steps.length - 1) {
+        waypoints.push(end_location);
+      }
+
       for (let j = 0; j < traffic_cams.length; j++) {
-        // Find start and end location of each leg as well as camera location
-        let start_location = [steps[i].start_location.lat, steps[i].start_location.lng];
-        let end_location = [steps[i].end_location.lat, steps[i].end_location.lng];
+        // Find coordinates of each camera
         let point = traffic_cams[j].geometry.coordinates;
+
 
         // check if camera in between start and end coordinates
         if (bound.isInBounds(start_location, end_location, point, 0.001)) {
@@ -144,7 +153,8 @@ app.post("/search", async (req, res) => {
       start_name: request.start,
       start_coords: request.start_coords,
       end_name: request.end,
-      end_coords: request.end_coords
+      end_coords: request.end_coords,
+      waypoints: JSON.stringify(waypoints)
     });
   }
 });

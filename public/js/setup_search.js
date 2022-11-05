@@ -19,6 +19,16 @@ let end_coords = {
 let end_name = "Destination: " + document.getElementById("end").value;
 addMarker(end_coords, map, end_name, "end");
 
+// Plot each waypoint
+let waypoints = JSON.parse(document.getElementById("waypoint_data").innerHTML);
+for (let i = 0; i < waypoints.length; i++) {
+  let coords = {
+    lat: waypoints[i][0],
+    lng: waypoint[i][1]
+  };
+  addMarker(coords, map, "Waypoint " + String(i + 1), "waypoint");
+}
+
 // Next plot data for each camera
 const template = "<div><b>Camera: camera_name</b></div>"
 
