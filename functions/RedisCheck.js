@@ -1,6 +1,6 @@
 
 const makeRedisKeys = async (camera) => {
-    var currentDateTime = await new Date("05-11-2022, 12:29:00");
+    var currentDateTime = await new Date("11-05-2022, 03:29:00");
     let keyarr = []
     await currentDateTime.setSeconds(00);
     for (let i = 0; i < 60; i++) {
@@ -9,7 +9,7 @@ const makeRedisKeys = async (camera) => {
         const redisKey = `${camera}/${time}.jpg`;
         await keyarr.push(redisKey)
     }
-    await currentDateTime.setMinutes(currentDateTime.getMinutes() + 60);
+    await currentDateTime.setMinutes(currentDateTime.getMinutes() - 60);
     return keyarr;
 };
 
