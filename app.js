@@ -5,27 +5,28 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const cors = require("cors");
 const helmet = require("helmet");
+
 const bound = require("./functions/isInBounds.js")
 const checkObjects = require("./functions/checkObjects");
 const getObject = require('./functions/getObject');
 const { uploadImages } = require('./functions/uploadImages');
 const { getCamList } = require('./functions/retrieveCameraList');
-const { checkRedisAndMakeList, filterForUnfound, filterForFound } = require('./functions/RedisCheck')
+const { checkRedisAndMakeList, filterForUnfound, filterForFound } = require('./functions/RedisCheck');
+const { getRoute } = require("./functions/getRoute");
 const cron = require('node-cron');
-/*
+
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
 const coco_ssd = require("@tensorflow-models/coco-ssd");
 // * Redis
 const { createClient } = require('redis');
-*/
 
 // Load environment variables
 require('dotenv').config();
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
 const coco_ssd = require("@tensorflow-models/coco-ssd");
-// * Redis 
+// * Redis
 const { createClient } = require('redis');
 
 const port = process.env.PORT || 8080;
@@ -89,6 +90,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/search", async (req, res) => {
+  // If user accesses page before model is loaded
   if (!model) {
     res.status(500).send("Model is not loaded yet!");
     return;
@@ -104,9 +106,10 @@ app.post("/search", async (req, res) => {
   } catch(e) {
     // shouldn't be possible but just in case redirect user back to index
     res.status(400).redirect("/error=input");
+    return;
   }
 
-  console.log(request);
+  console.log(request); //TODO: remove once done testing
 
   let route = getRoute(request.start, request.end);
   if (route === 503) {
@@ -133,7 +136,7 @@ app.post("/search", async (req, res) => {
 
     console.log("Found all cameras");
 
-    // now we have the list of steps so we can plot or do what we want with them
+    // TODO: add analysis here
 
     res.render("search", {
       key:google_api_key,
@@ -145,44 +148,6 @@ app.post("/search", async (req, res) => {
     });
   }
 });
-
-async function getRoute(start, end) {
-  let redis_key = start + " - " + end;
-  let result = await redisClient.get(redis_key);
-  let route;
-  if (result) {
-    route = JSON.parse(result);
-  } else {
-    route = getRouteNoRedis(request);
-    // Don't push to redis if an error has occurred
-    if (route != 400 && route != 503) {
-      redisClient.setEx(
-        redis_key,
-        900,
-        JSON.stringify(route)
-      );
-    }
-    return route;
-  }
-
-}
-
-async function getRouteNoRedis(start, end) {
-  let route_url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
-    start.replace(/ /g, "+") + "&destination=" +
-    end.replace(/ /g, "+") + "&key=" + google_api_key;
-
-  let directions_response;
-  try {
-    directions_response = await axios.get(route_url);
-    if (directions_response.data.routes.length === 0) {
-      return 400;
-    }
-    return directions_response.data.routes[0];
-  } catch (e) {
-    return 503;
-  }
-}
 
 cron.schedule('* * * * *', () => {
   try {
