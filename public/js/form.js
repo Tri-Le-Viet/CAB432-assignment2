@@ -60,11 +60,6 @@ function onPlaceChanged(form_type) {
       addMarker(lat_long, map, name, "end");
     }
   }
-
-
-  if (start_marker && end_marker) {
-    renderRoute()
-  }
 }
 
 
