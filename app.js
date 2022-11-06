@@ -95,8 +95,6 @@ app.post("/search", async (req, res) => {
     return;
   }
 
-  console.log(request); //TODO: remove once done testing
-
   let waypoints = [];
   let route = await getRoute(request.start, request.end, redis_client, google_api_key);
 
@@ -130,6 +128,7 @@ app.post("/search", async (req, res) => {
     console.log("Found all cameras");
 
     // TODO: add analysis here
+    let traffic_data; // results of analysis here
 
     res.render("search", {
       key:google_api_key,
@@ -138,7 +137,8 @@ app.post("/search", async (req, res) => {
       start_coords: request.start_coords,
       end_name: request.end,
       end_coords: request.end_coords,
-      waypoints: JSON.stringify(waypoints)
+      waypoints: JSON.stringify(waypoints),
+      data: JSON.stringify(traffic_data)
     });
   }
 });
