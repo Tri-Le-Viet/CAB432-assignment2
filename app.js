@@ -12,7 +12,6 @@ const { uploadImages } = require('./functions/uploadImages');
 const { getCamList } = require('./functions/retrieveCameraList');
 const { checkRedisAndMakeList, filterForUnfound, filterForFound } = require('./functions/RedisCheck');
 const { getRoute } = require("./functions/getRoute");
-// const cron = require('node-cron');
 
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
@@ -30,14 +29,11 @@ const google_api_key = process.env.GOOGLE_API_KEY;
 
 const app = express();
 app.use(express.json());
-app.use(helmet());
-
 app.use(cors({
   origin: '*',
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'PUT', 'POST']
 }));
-
 app.set("view engine", "ejs");
 app.set("views", path.resolve(__dirname + "/views"));
 app.use(express.static(__dirname + "/public"));
@@ -45,7 +41,9 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+
 // Init Model
+
 let model;
 (async () => {
   model = await coco_ssd.load({
@@ -55,16 +53,17 @@ let model;
 
 // Redis init
 const elasticache_config_endpoint = { url: "redis://@n11025875-trafficcache.km2jzi.ng.0001.apse2.cache.amazonaws.com:6379" }
-let redisClient = createClient(elasticache_config_endpoint);
+let redis_client = createClient(elasticache_config_endpoint);
 (async () => {
   try {
-    await redisClient.connect();
+    await redis_client.connect();
     console.log(`Connected to ${elasticache_config_endpoint.url}`)
   } catch (err) {
     console.log(err);
-    redisClient = null;
+    redis_client = null;
   }
 })();
+
 
 
 app.get("/", (req, res) => {
@@ -99,7 +98,7 @@ app.post("/search", async (req, res) => {
   console.log(request); //TODO: remove once done testing
 
   let waypoints = [];
-  let route = getRoute(request.start, request.end, redis_client);
+  let route = await getRoute(request.start, request.end, redis_client, google_api_key);
 
   if (route === 503) {
     res.status(503).send("Google Maps Directions API not available. Try again later");
@@ -146,7 +145,7 @@ app.post("/search", async (req, res) => {
 
 // Route to retrieve list of traffic cameras
 app.get("/api", async (req, res) => {
-  getCamList(redisClient)
+  getCamList(redis_client)
     .then((result) => {
       res.json(result);
     })
@@ -161,15 +160,15 @@ app.post("/predict", (req, res) => {
   }
 
   const getImageAndPredict = async () => {
-    checkRedisAndMakeList(cams, redisClient)
+    checkRedisAndMakeList(cams, redis_client)
       .then(async (results) => {
         const found = await filterForFound(results)
         const unfound = await filterForUnfound(results)
-        const imageBuff = await getObject.retrieveImagesArray(unfound);
-        const buffersOfCamera = await Promise.all(imageBuff.map(async function (cameras) {
-          const imagesOfcamera = await Promise.all(cameras.buffers.map(async function (image) {
-            const decodedImage = await tf.node.decodeImage(image.imageBuffers);
-            const predictions = await model.detect(decodedImage, 20, 0.15)
+        const image_buff = await getObject.retrieveImagesArray(unfound);
+        const buffers_of_camera = await Promise.all(image_buff.map(async function (cameras) {
+          const images_of_camera = await Promise.all(cameras.buffers.map(async function (image) {
+            const decoded_image = await tf.node.decodeImage(image.imageBuffers);
+            const predictions = await model.detect(decoded_image, 20, 0.15)
               .then((result) => {
                 const types = ["truck", "bus", "motorcycle", "car"]
                 let count = 0;
@@ -187,49 +186,39 @@ app.post("/predict", (req, res) => {
           }))
           return {
             cameraName: cameras.camera,
-            images: imagesOfcamera
+            images: images_of_camera
           }
         }))
-        const joinedResults = await Promise.all(found.map(async function (camera, index) {
+        const joined_results = await Promise.all(found.map(async function (camera, index) {
           camera.images.forEach(async element => {
-            const redisKey = `${element.loggedImage}`.replaceAll(" ", "");
+            const redis_key = `${element.loggedImage}`.replaceAll(" ", "");
             const redisValue = element.results.toString();
-            await redisClient.setEx(
-              redisKey,
+            await redis_client.setEx(
+              redis_key,
               300,
               redisValue
             );
           });
-          buffersOfCamera[index].images.forEach(async element => {
-            const redisKey2 = `${element.loggedImage}`.replaceAll(" ", "");
+          buffers_of_camera[index].images.forEach(async element => {
+            const redis_key2 = `${element.loggedImage}`.replaceAll(" ", "");
             const redisValue2 = element.results.toString();
-            await redisClient.setEx(
-              redisKey2,
+            await redis_client.setEx(
+              redis_key2,
               300,
               redisValue2
             );
           });
-          let newArr = []
-          const newResultsArray = newArr.concat(camera.images, buffersOfCamera[index].images);
+          let new_arr = []
+          const new_results_array = new_arr.concat(camera.images, buffers_of_camera[index].images);
           return {
             cameraName: camera.cameraName,
-            images: newResultsArray
+            images: new_results_array
           }
         }))
-        res.status(200).send(joinedResults)
+        res.status(200).send(joined_results)
       })
   }
   getImageAndPredict()
 });
-
-// cron.schedule('* * * * *', () => {
-//   try {
-//     console.log('running a task every minute');
-//     uploadImages(redisClient);
-//   }
-//   catch (e) {
-//     console.log(e)
-//   }
-// });
 
 app.listen(port, console.log("Server started on port " + port));

@@ -24,7 +24,7 @@ let waypoints = JSON.parse(document.getElementById("waypoint_data").innerHTML);
 for (let i = 0; i < waypoints.length; i++) {
   let coords = {
     lat: waypoints[i][0],
-    lng: waypoint[i][1]
+    lng: waypoints[i][1]
   };
   addMarker(coords, map, "Waypoint " + String(i + 1), "waypoint");
 }
