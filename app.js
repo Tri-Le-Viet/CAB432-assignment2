@@ -67,10 +67,10 @@ let redis_client = createClient(elasticache_config_endpoint);
 app.get("/", async (req, res) => {
   let error = req.query.error;
   const cameraList = await getCamList(redis_client);
-  const trafficCams = cameraList.features;
+  const traffic_cams = cameraList.features;
   res.render("index", {
     key:google_api_key,
-    traffic_cams:JSON.stringify(trafficCams),
+    traffic_cams:JSON.stringify(traffic_cams),
     error_type: error
   });
 });
@@ -107,6 +107,8 @@ app.post("/search", async (req, res) => {
     let relevant_cameras = [];
     let camera_names = [];
 
+    const cameraList = await getCamList(redis_client);
+    const traffic_cams = cameraList.features;
     for (let i = 0; i < steps.length; i++) {
       // Find start and end location of each leg
       let start_location = [steps[i].start_location.lat, steps[i].start_location.lng];
@@ -130,6 +132,7 @@ app.post("/search", async (req, res) => {
     console.log("Found all cameras");
 
     // TODO: add analysis here
+    getImageAndPredict()
     let traffic_data; // results of analysis here
 
     res.render("search", {
@@ -161,66 +164,68 @@ app.post("/predict", (req, res) => {
     return;
   }
 
-  const getImageAndPredict = async () => {
-    checkRedisAndMakeList(cams, redis_client)
-      .then(async (results) => {
-        const found = await filterForFound(results)
-        const unfound = await filterForUnfound(results)
-        const image_buff = await getObject.retrieveImagesArray(unfound);
-        const buffers_of_camera = await Promise.all(image_buff.map(async function (cameras) {
-          const images_of_camera = await Promise.all(cameras.buffers.map(async function (image) {
-            const decoded_image = await tf.node.decodeImage(image.imageBuffers);
-            const predictions = await model.detect(decoded_image, 20, 0.15)
-              .then((result) => {
-                const types = ["truck", "bus", "motorcycle", "car"]
-                let count = 0;
-                result.forEach(element => {
-                  if (types.includes(element.class))
-                    return count++
-                });
-                return count
-              })
-            const obj = {
-              loggedImage: image.key,
-              results: predictions
-            }
-            return obj
-          }))
-          return {
-            cameraName: cameras.camera,
-            images: images_of_camera
-          }
-        }))
-        const joined_results = await Promise.all(found.map(async function (camera, index) {
-          camera.images.forEach(async element => {
-            const redis_key = `${element.loggedImage}`.replaceAll(" ", "");
-            const redisValue = element.results.toString();
-            await redis_client.setEx(
-              redis_key,
-              300,
-              redisValue
-            );
-          });
-          buffers_of_camera[index].images.forEach(async element => {
-            const redis_key2 = `${element.loggedImage}`.replaceAll(" ", "");
-            const redisValue2 = element.results.toString();
-            await redis_client.setEx(
-              redis_key2,
-              300,
-              redisValue2
-            );
-          });
-          let new_arr = []
-          const new_results_array = new_arr.concat(camera.images, buffers_of_camera[index].images);
-          return {
-            cameraName: camera.cameraName,
-            images: new_results_array
-          }
-        }))
-        res.status(200).send(joined_results)
-      })
-  }
-  getImageAndPredict()
+  
+  getImageAndPredict(cams, redis_client)
 });
+
+const getImageAndPredict = async (cams, redis_client) => {
+  checkRedisAndMakeList(cams, redis_client)
+    .then(async (results) => {
+      const found = await filterForFound(results)
+      const unfound = await filterForUnfound(results)
+      const image_buff = await getObject.retrieveImagesArray(unfound);
+      const buffers_of_camera = await Promise.all(image_buff.map(async function (cameras) {
+        const images_of_camera = await Promise.all(cameras.buffers.map(async function (image) {
+          const decoded_image = await tf.node.decodeImage(image.imageBuffers);
+          const predictions = await model.detect(decoded_image, 20, 0.15)
+            .then((result) => {
+              const types = ["truck", "bus", "motorcycle", "car"]
+              let count = 0;
+              result.forEach(element => {
+                if (types.includes(element.class))
+                  return count++
+              });
+              return count
+            })
+          const obj = {
+            loggedImage: image.key,
+            results: predictions
+          }
+          return obj
+        }))
+        return {
+          cameraName: cameras.camera,
+          images: images_of_camera
+        }
+      }))
+      const joined_results = await Promise.all(found.map(async function (camera, index) {
+        camera.images.forEach(async element => {
+          const redis_key = `${element.loggedImage}`.replaceAll(" ", "");
+          const redisValue = element.results.toString();
+          await redis_client.setEx(
+            redis_key,
+            300,
+            redisValue
+          );
+        });
+        buffers_of_camera[index].images.forEach(async element => {
+          const redis_key2 = `${element.loggedImage}`.replaceAll(" ", "");
+          const redisValue2 = element.results.toString();
+          await redis_client.setEx(
+            redis_key2,
+            300,
+            redisValue2
+          );
+        });
+        let new_arr = []
+        const new_results_array = new_arr.concat(camera.images, buffers_of_camera[index].images);
+        return {
+          cameraName: camera.cameraName,
+          images: new_results_array
+        }
+      }))
+      res.status(200).send(joined_results)
+    })
+}
 
 app.listen(port, console.log("Server started on port " + port));
