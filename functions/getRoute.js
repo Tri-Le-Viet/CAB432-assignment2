@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-async function getRoute(start, end, redis_client, GOOGLE_API_KEY) {
+async function getRoute(start, end, redis_client, google_api_key) {
   let route;
 
   // If redis cache is unavailable
@@ -11,7 +11,6 @@ async function getRoute(start, end, redis_client, GOOGLE_API_KEY) {
   let redis_key = start + " - " + end;
   let result = await redis_client.get(redis_key);
   if (result) {
-    console.log(result);
     route = JSON.parse(result);
   } else {
     route = await getRouteNoRedis(start, end, google_api_key);
@@ -34,9 +33,7 @@ async function getRouteNoRedis(start, end, google_api_key) {
     end.replace(/ /g, "+") + "&key=" + google_api_key;
 
   try {
-    console.log(route_url);
     let directions_response = await axios.get(route_url);
-    console.log(directions_response);
     if (directions_response.data.routes.length === 0) {
       return 400;
     }

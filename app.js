@@ -97,7 +97,6 @@ app.post("/search", async (req, res) => {
 
   let waypoints = [];
   let route = await getRoute(request.start, request.end, redis_client, google_api_key);
-
   if (route === 503) {
     res.status(503).send("Google Maps Directions API not available. Try again later");
   } else if (route === 400){
