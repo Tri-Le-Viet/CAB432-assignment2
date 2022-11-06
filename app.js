@@ -4,7 +4,6 @@ const axios = require("axios");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const cors = require("cors");
-const helmet = require("helmet");
 const bound = require("./functions/isInBounds.js")
 const checkObjects = require("./functions/checkObjects");
 const getObject = require('./functions/getObject');
@@ -31,7 +30,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: '*',
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Security-Policy', 'Content-Type', 'Authorization'],
   methods: ['GET', 'PUT', 'POST']
 }));
 app.set("view engine", "ejs");
