@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-async function getRoute(start, end, redis_client, google_api_key) {
+async function getRoute(start, end, redis_client, GOOGLE_API_KEY) {
   let route;
 
   // If redis cache is unavailable
