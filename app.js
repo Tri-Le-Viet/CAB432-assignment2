@@ -127,9 +127,6 @@ app.post("/search", async (req, res) => {
         }
       }
     }
-
-    console.log("Found all cameras");
-
     let traffic_data = getImageAndPredict(camera_names);
 
     res.render("search", {
