@@ -9,7 +9,7 @@ const makeRedisKeys = async (camera) => {
         const redisKey = `${camera}/${time}.jpg`;
         await keyarr.push(redisKey);
     }
-    await currentDateTime.setMinutes(currentDateTime.getMinutes() - 60);
+    await currentDateTime.setSeconds(currentDateTime.getSeconds() - 60);
     return keyarr;
 };
 

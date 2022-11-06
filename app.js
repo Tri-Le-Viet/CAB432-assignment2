@@ -5,7 +5,6 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const cors = require("cors");
 const helmet = require("helmet");
-
 const bound = require("./functions/isInBounds.js")
 const checkObjects = require("./functions/checkObjects");
 const getObject = require('./functions/getObject');
