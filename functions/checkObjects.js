@@ -25,7 +25,7 @@ const viewAlbum = async (albumNames) => {
         new ListObjectsCommand({
           Prefix: album,
           Bucket: albumBucketName,
-        });
+        })
       );
       const photos = await Promise.all(data.Contents.map(function (photo) {
         const photoKey = photo.Key;
