@@ -45,13 +45,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(helmet());
-app.use(cors({
-  origin: '*',
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  methods: ['GET', 'PUT', 'POST']
-}));
-
 // Init Model
 let model;
 (async () => {
