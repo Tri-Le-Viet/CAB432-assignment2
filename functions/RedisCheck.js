@@ -7,7 +7,7 @@ const makeRedisKeys = async (camera) => {
         await currentDateTime.setMinutes(currentDateTime.getMinutes() - 1);
         let time = (new Date(currentDateTime)).toLocaleString("en-GB", { timeZone: "Australia/Brisbane" }).replaceAll('/', '-');
         const redisKey = `${camera}/${time}.jpg`;
-        await keyarr.push(redisKey)
+        await keyarr.push(redisKey);
     }
     await currentDateTime.setMinutes(currentDateTime.getMinutes() - 60);
     return keyarr;
@@ -22,12 +22,12 @@ const checkResults = async (redisClient, keyList) => {
             return {
                 loggedImage: key,
                 results: listedResult
-            }
+            };
         } else {
-            return key
+            return key;
         }
     }))
-    return listedResults
+    return listedResults;
 }
 
 const checkRedisAndMakeList = async (cams, redisClient) => {
@@ -37,22 +37,24 @@ const checkRedisAndMakeList = async (cams, redisClient) => {
     return {
         name: camera,
         keys: results
-    }
-  }))
+    };
+  }));
   return keyLists;
 }
 
+// Determine if
 function isString(value) {
     if(typeof(value) === "string"){
         return true;
     }
   }
 
+  //
   function filterByString(item) {
     if(isString(item)) {
-        return true
+        return true;
       }
-      return false
+      return false;
   }
 
 const filterForUnfound = async (results) => {
@@ -61,9 +63,9 @@ const filterForUnfound = async (results) => {
         return {
           name: result.name,
           keys: eachValue
-        }
+        };
       }))
-      return filteredList
+      return filteredList;
 }
 
 function isObject(obj) {
@@ -72,20 +74,20 @@ function isObject(obj) {
 
   function filterByObject(item) {
     if(isObject(item)) {
-        return true
+        return true;
       }
-      return false
+      return false;
   }
 
 const filterForFound = async (results) => {
     const filteredList = await Promise.all(results.map(async function (result) {
-        const eachValue = await Promise.all(result.keys.filter(filterByObject))
+        const eachValue = await Promise.all(result.keys.filter(filterByObject));
         return {
             cameraName: result.name,
             images: eachValue
-        }
-      }))
-      return filteredList
+        };
+      }));
+      return filteredList;
 }
 
 module.exports = { checkRedisAndMakeList, filterForUnfound, filterForFound };

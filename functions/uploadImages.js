@@ -5,6 +5,7 @@ const { getCamList } = require('./retrieveCameraList');
 const { viewAlbum } = require("./checkObjects");
 require('dotenv').config();
 
+// Upload a single image to S3
 async function s3Upload(url, key) {
   const resp = await axios.get(url, {
     decompress: false,
@@ -23,6 +24,7 @@ async function s3Upload(url, key) {
   upload();
 };
 
+// Upload all images from list of traffic cameras
 async function uploadImages(redisClient) {
   try {
     const cameraList = await getCamList(redisClient);
@@ -41,7 +43,7 @@ async function uploadImages(redisClient) {
       }
     }
     const logs = await getLogs(data);
-    
+
     for (let i = 0; i < trafficCams.length; i++) {
       var currentDateTime = await new Date();
       await currentDateTime.setSeconds(00);

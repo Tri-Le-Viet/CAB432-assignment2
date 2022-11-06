@@ -129,8 +129,6 @@ app.post("/search", async (req, res) => {
       for (let j = 0; j < traffic_cams.length; j++) {
         // Find coordinates of each camera
         let point = traffic_cams[j].geometry.coordinates;
-
-
         // check if camera in between start and end coordinates
         if (bound.isInBounds(start_location, end_location, point, 0.001)) {
           relevant_cameras.push(traffic_cams[j]);

@@ -9,9 +9,9 @@ const listAlbums = async () => {
     const albums = await Promise.all(data.CommonPrefixes.map(async (commonPrefix) => {
       const prefix = commonPrefix.Prefix;
       const albumName = await decodeURIComponent(prefix.replace("/", ""));
-      return albumName
+      return albumName;
     }));
-    return albums
+    return albums;
   } catch (err) {
     return console.log("There was an error listing your albums: " + err.message);
   }
@@ -25,7 +25,7 @@ const viewAlbum = async (albumNames) => {
         new ListObjectsCommand({
           Prefix: album,
           Bucket: albumBucketName,
-        })
+        });
       );
       const photos = await Promise.all(data.Contents.map(function (photo) {
         const photoKey = photo.Key;
@@ -34,9 +34,9 @@ const viewAlbum = async (albumNames) => {
       return {
         name: album,
         keys: photos
-      }
+      };
     }));
-    return albums
+    return albums;
   } catch (err) {
     return console.log("There was an error viewing your album: " + err.message);
   }
