@@ -105,6 +105,7 @@ app.post("/search", async (req, res) => {
   } else {
     let steps = route.legs[0].steps;
     let relevant_cameras = [];
+    let camera_names = [];
 
     for (let i = 0; i < steps.length; i++) {
       // Find start and end location of each leg
@@ -121,6 +122,7 @@ app.post("/search", async (req, res) => {
         // check if camera in between start and end coordinates
         if (bound.isInBounds(start_location, end_location, point, 0.001)) {
           relevant_cameras.push(traffic_cams[j]);
+          camera_names.push(traffic_cams[j].properties.description);
         }
       }
     }

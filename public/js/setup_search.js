@@ -35,7 +35,7 @@ let traffic_data = JSON.parse(document.getElementById("traffic_data").innerHTML)
 
 for(let i=0; i < traffic_cams.length; i++) {
   let info_window = info_windows[i];
-  let camera_name = traffic_cams[i].properties.description
+  let camera_name = traffic_cams[i].properties.description;
   let info = template.replace(/camera_name/g, camera_name);
   info_window.setContent(info);
 
