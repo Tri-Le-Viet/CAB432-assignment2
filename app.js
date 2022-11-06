@@ -22,7 +22,6 @@ const { createClient } = require('redis');
 require('dotenv').config();
 
 const port = process.env.PORT || 8080;
-const traffic_cams = require("./traffic_cams.json"); //TODO: in final we should recreate traffic_cams.json each time
 
 const google_api_key = process.env.GOOGLE_API_KEY;
 
@@ -65,11 +64,13 @@ let redis_client = createClient(elasticache_config_endpoint);
 
 
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   let error = req.query.error;
+  const cameraList = await getCamList(redis_client);
+  const trafficCams = cameraList.features;
   res.render("index", {
     key:google_api_key,
-    traffic_cams:JSON.stringify(traffic_cams),
+    traffic_cams:JSON.stringify(trafficCams),
     error_type: error
   });
 });
