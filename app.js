@@ -131,9 +131,7 @@ app.post("/search", async (req, res) => {
 
     console.log("Found all cameras");
 
-    // TODO: add analysis here
-    getImageAndPredict()
-    let traffic_data; // results of analysis here
+    let traffic_data = getImageAndPredict(camera_names);
 
     res.render("search", {
       key:google_api_key,
@@ -164,7 +162,7 @@ app.post("/predict", (req, res) => {
     return;
   }
 
-  
+
   getImageAndPredict(cams, redis_client)
 });
 
