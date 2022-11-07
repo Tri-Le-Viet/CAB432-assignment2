@@ -5,19 +5,15 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const cors = require("cors");
 const bound = require("./functions/isInBounds.js")
-
 const { uploadImages } = require('./functions/uploadImages');
 const { getCamList } = require('./functions/retrieveCameraList');
-
 const { getRoute } = require("./functions/getRoute");
 const { getImageAndPredict } = require('./functions/makePredictions');
-
 // * TensorFlow
 const tf = require('@tensorflow/tfjs-node');
 const coco_ssd = require("@tensorflow-models/coco-ssd");
 // * Redis
 const { createClient } = require('redis');
-
 // Load environment variables
 require('dotenv').config();
 
@@ -89,50 +85,54 @@ app.post("/search", async (req, res) => {
   };
 
   let waypoints = [];
-  let route = await getRoute(request.start, request.end, redis_client, google_api_key);
-  if (route === 503) {
-    res.status(503).send("Google Maps Directions API not available. Try again later");
-  } else if (route === 400){
-    res.status(400).redirect("/?error=route");
-  } else {
-    let steps = route.legs[0].steps;
-    let relevant_cameras = [];
-    let camera_names = [];
+  await getRoute(request.start, request.end, redis_client, google_api_key)
+    .then(async (route) => {
+      if (route === 503) {
+        res.status(503).send("Google Maps Directions API not available. Try again later");
+      } else if (route === 400) {
+        res.status(400).redirect("/?error=route");
+      } else {
+        let steps = route.legs[0].steps;
+        let relevant_cameras = [];
+        let camera_names = [];
 
-    const cameraList = await getCamList(redis_client);
-    const traffic_cams = cameraList.features;
-    for (let i = 0; i < steps.length; i++) {
-      // Find start and end location of each leg
-      let start_location = [steps[i].start_location.lat, steps[i].start_location.lng];
-      let end_location = [steps[i].end_location.lat, steps[i].end_location.lng];
+        const cameraList = await getCamList(redis_client);
+        const traffic_cams = cameraList.features;
+        for (let i = 0; i < steps.length; i++) {
+          // Find start and end location of each leg
+          let start_location = [steps[i].start_location.lat, steps[i].start_location.lng];
+          let end_location = [steps[i].end_location.lat, steps[i].end_location.lng];
 
-      if (i != steps.length - 1) {
-        waypoints.push(end_location);
-      }
+          if (i != steps.length - 1) {
+            waypoints.push(end_location);
+          }
 
-      for (let j = 0; j < traffic_cams.length; j++) {
-        // Find coordinates of each camera
-        let point = traffic_cams[j].geometry.coordinates;
-        // check if camera in between start and end coordinates
-        if (bound.isInBounds(start_location, end_location, point, 0.001)) {
-          relevant_cameras.push(traffic_cams[j]);
-          camera_names.push(traffic_cams[j].properties.description);
+          for (let j = 0; j < traffic_cams.length; j++) {
+            // Find coordinates of each camera
+            let point = traffic_cams[j].geometry.coordinates;
+            // check if camera in between start and end coordinates
+            if (bound.isInBounds(start_location, end_location, point, 0.001)) {
+              relevant_cameras.push(traffic_cams[j]);
+              camera_names.push(traffic_cams[j].properties.description);
+            }
+          }
         }
+        await getImageAndPredict(camera_names, redis_client, model)
+          .then((traffic_data) => {
+            res.render("search", {
+              key: google_api_key,
+              traffic_cams: JSON.stringify(relevant_cameras),
+              start_name: request.start,
+              start_coords: request.start_coords,
+              end_name: request.end,
+              end_coords: request.end_coords,
+              waypoints: JSON.stringify(waypoints),
+              traffic_data: JSON.stringify(traffic_data)
+            });
+          })
+        
       }
-    }
-    let traffic_data = getImageAndPredict(camera_names);
-
-    res.render("search", {
-      key:google_api_key,
-      traffic_cams:JSON.stringify(relevant_cameras),
-      start_name: request.start,
-      start_coords: request.start_coords,
-      end_name: request.end,
-      end_coords: request.end_coords,
-      waypoints: JSON.stringify(waypoints),
-      data: JSON.stringify(traffic_data)
-    });
-  }
+    })
 });
 
 // Route to retrieve list of traffic cameras
