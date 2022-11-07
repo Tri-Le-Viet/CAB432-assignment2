@@ -61,13 +61,12 @@ for(let i=0; i < traffic_cams.length; i++) {
   title.innerHTML = camera_name;
   let canvas = document.createElement("canvas");
 
-
   let newChart = new Chart(canvas, {
     type: "line",
     data: data,
     options: {}
   });
 
-  map.appendChild(title);
-  map.appendChild(canvas);
+  graphs.appendChild(title);
+  graphs.appendChild(canvas);
 }
