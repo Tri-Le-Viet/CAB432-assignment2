@@ -32,6 +32,7 @@ for (let i = 0; i < waypoints.length; i++) {
 // Next plot data for each camera
 const template = "\<div><b>Camera: camera_name</b></div><div><canvas id='id_num'></canvas></div>"
 let traffic_data = JSON.parse(document.getElementById("traffic_data").innerHTML);
+let graphs = document.getElementById("graphs");
 
 for(let i=0; i < traffic_cams.length; i++) {
   let info_window = info_windows[i];
@@ -55,9 +56,18 @@ for(let i=0; i < traffic_cams.length; i++) {
     data: dataset
   };
 
-  let newChart = new Chart(document.getElementById(i), {
+
+  let title = document.createElement("h2");
+  title.innerHTML = camera_name;
+  let canvas = document.createElement("canvas");
+
+
+  let newChart = new Chart(canvas, {
     type: "line",
     data: data,
     options: {}
   });
+
+  map.appendChild(title);
+  map.appendChild(canvas);
 }
