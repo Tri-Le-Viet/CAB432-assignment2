@@ -58,15 +58,13 @@ let redis_client = createClient(elasticache_config_endpoint);
   }
 })();
 
-
-
 app.get("/", async (req, res) => {
   let error = req.query.error;
   const cameraList = await getCamList(redis_client);
   const traffic_cams = cameraList.features;
   res.render("index", {
-    key: google_api_key,
-    traffic_cams: JSON.stringify(traffic_cams),
+    key:google_api_key,
+    traffic_cams:JSON.stringify(traffic_cams),
     error_type: error
   });
 });
@@ -77,19 +75,12 @@ app.post("/search", async (req, res) => {
     res.status(500).send("Model is not loaded yet!");
     return;
   }
-
-  try {
-    request = {
-      start: req.body.start,
-      end: req.body.end,
-      start_coords: req.body.start_coords,
-      end_coords: req.body.end_coords
-    };
-  } catch (e) {
-    // shouldn't be possible but just in case redirect user back to index
-    res.status(400).redirect("/error=input");
-    return;
-  }
+  const request = {
+    start: req.body.start,
+    end: req.body.end,
+    start_coords: req.body.start_coords,
+    end_coords: req.body.end_coords
+  };
 
   let waypoints = [];
   await getRoute(request.start, request.end, redis_client, google_api_key)
@@ -158,7 +149,7 @@ app.post("/predict", (req, res) => {
     return;
   }
   getImageAndPredict(cams, redis_client, model)
-    .then((traffic_data) => res.status(200).send(traffic_data))
+    .then((joined_results) => res.status(200).send(joined_results))
 });
 
 app.listen(port, console.log("Server started on port " + port));
