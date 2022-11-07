@@ -51,7 +51,7 @@ for(let i=0; i < traffic_cams.length; i++) {
   }
 
   let data = {
-    labels: labels,
+    labels: lables,
     data: dataset
   };
 

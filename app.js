@@ -22,24 +22,22 @@ const port = process.env.PORT || 8080;
 const google_api_key = process.env.GOOGLE_API_KEY;
 
 const app = express();
-
 app.use(express.json());
-
 app.use(cors({
   origin: '*',
   allowedHeaders: ['Content-Security-Policy', 'Content-Type', 'Authorization'],
   methods: ['GET', 'PUT', 'POST']
 }));
-
 app.set("view engine", "ejs");
 app.set("views", path.resolve(__dirname + "/views"));
 app.use(express.static(__dirname + "/public"));
-
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+
 // Init Model
+
 let model;
 (async () => {
   model = await coco_ssd.load({
@@ -60,6 +58,8 @@ let redis_client = createClient(elasticache_config_endpoint);
   }
 })();
 
+
+
 app.get("/", async (req, res) => {
   let error = req.query.error;
   const cameraList = await getCamList(redis_client);
@@ -77,12 +77,19 @@ app.post("/search", async (req, res) => {
     res.status(500).send("Model is not loaded yet!");
     return;
   }
-  const request = {
-    start: req.body.start,
-    end: req.body.end,
-    start_coords: req.body.start_coords,
-    end_coords: req.body.end_coords
-  };
+
+  try {
+    request = {
+      start: req.body.start,
+      end: req.body.end,
+      start_coords: req.body.start_coords,
+      end_coords: req.body.end_coords
+    };
+  } catch (e) {
+    // shouldn't be possible but just in case redirect user back to index
+    res.status(400).redirect("/error=input");
+    return;
+  }
 
   let waypoints = [];
   await getRoute(request.start, request.end, redis_client, google_api_key)
@@ -130,7 +137,7 @@ app.post("/search", async (req, res) => {
               traffic_data: JSON.stringify(traffic_data)
             });
           })
-        
+
       }
     })
 });
@@ -144,14 +151,14 @@ app.get("/api", async (req, res) => {
 });
 
 // Route to return count of vehicles for every image of each camera in 60min window
-app.post("/predict", async (req, res) => {
+app.post("/predict", (req, res) => {
   const cams = req.body.cameras
   if (!model) {
     res.status(500).send("Model is not loaded yet!");
     return;
   }
   getImageAndPredict(cams, redis_client, model)
-    .then((joined_results) => res.status(200).send(joined_results))
+    .then((traffic_data) => res.status(200).send(traffic_data))
 });
 
 app.listen(port, console.log("Server started on port " + port));
