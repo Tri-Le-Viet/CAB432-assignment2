@@ -30,13 +30,14 @@ for (let i = 0; i < waypoints.length; i++) {
 }
 
 // Next plot data for each camera
-const template = "\<div><b>Camera: camera_name</b></div><div><canvas id='camera_name'></canvas></div>"
+const template = "\<div><b>Camera: camera_name</b></div><div><canvas id='id_num'></canvas></div>"
 let traffic_data = JSON.parse(document.getElementById("traffic_data").innerHTML);
 
 for(let i=0; i < traffic_cams.length; i++) {
   let info_window = info_windows[i];
   let camera_name = traffic_cams[i].properties.description;
-  let info = template.replace(/camera_name/g, camera_name);
+  let info = template.replace(/camera_name/, camera_name).replace(/id_num/, i);
+
   info_window.setContent(info);
 
   let labels = [];
@@ -54,7 +55,7 @@ for(let i=0; i < traffic_cams.length; i++) {
     data: dataset
   };
 
-  let newChart = new Chart(document.getElementById(camera_name), {
+  let newChart = new Chart(document.getElementById(i), {
     type: "line",
     data: data,
     options: {}
